@@ -25,16 +25,16 @@
   },
   "homepage": "https://github.com/kourge/ts-brand#readme",
   "devDependencies": {
-    "@types/jest": "^21.1.1",
-    "jest": "^21.2.1",
-    "ts-jest": "^21.0.1",
-    "typescript": "^2.5.3"
+    "@jest/globals": "^29.0.2",
+    "@types/jest": "^28.1.3",
+    "jest": "^28.1.3",
+    "ts-jest": "^28.0.8",
+    "typescript": "^4.8.3"
   },
   "jest": {
     "transform": {
-      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "^.+\\.tsx?$": "ts-jest"
     },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",

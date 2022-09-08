@@ -1,15 +1,12 @@
-import {AnyBrand, identity, make} from '../src/index';
+import { test, expect } from '@jest/globals';
+import { AnyBrand, brander, createBrander } from '../src/index';
 
-describe('identity', () => {
-  it('returns the same value', () => {
-    const input = {};
+test('Should check that the brander function behaves like an identity function at runtime', () => {
+  const input = {};
 
-    expect(identity(input)).toBe(input);
-  });
+  expect(brander(input)).toBe(input);
 });
 
-describe('make', () => {
-  it('returns `identity`', () => {
-    expect(make<AnyBrand>()).toBe(identity);
-  });
+test('Should ensure that createBrander returns a brander', () => {
+  expect(createBrander<AnyBrand>()).toBe(brander);
 });

@@ -1,16 +1,17 @@
 /**
  * A `Brand` is a type that takes at minimum two type parameters. Given a base
- * type `Base` and some unique and arbitrary branding type `Branding`, it
- * produces a type based on but distinct from `Base`. The resulting branded
- * type is not directly assignable from the base type, and not mutually
+ * type `Base` and some unique and arbitrary branding type `BrandingT`, it
+ * produces a type based on but distinct from `Base`.
+ *
+ * The resulting branded type is not directly assignable from the base type, and not mutually
  * assignable with another branded type derived from the same base type.
  *
  * Take care that the branding type is unique. Two branded types that share the
  * same base type and branding type are considered the same type! There are two
  * ways to avoid this.
  *
- * The first way is to supply a third type parameter, `ReservedName`, with a
- * string literal type that is not `__type__`, which is the default.
+ * The first way is to supply a third type parameter, `BrandingProp`, with a
+ * string literal or string literal union type that is not `__type__`, which is the default.
  *
  * The second way is to define a branded type in terms of its surrounding
  * interface, thereby forming a recursive type. This is possible because there
@@ -25,34 +26,31 @@
  * interface Post { id: Brand<number, Post> }
  * ```
  */
-export type Brand<
-  Base,
-  Branding,
-  ReservedName extends string = '__type__'
-> = Base & {[K in ReservedName]: Branding} & {__witness__: Base};
+export type Brand<Base, BrandingT, BrandingProp extends string = '__type__'> = Base & {
+  [K in BrandingProp]: BrandingT;
+} & { __base__: Base };
 
 /**
  * An `AnyBrand` is a branded type based on any base type branded with any
  * branding type. By itself it is not useful, but it can act as type constraint
  * when manipulating branded types in general.
  */
-export type AnyBrand = Brand<any, any>;
+export type AnyBrand = Brand<unknown, any, any>;
 
 /**
  * `BaseOf` is a type that takes any branded type `B` and yields its base type.
  */
-export type BaseOf<B extends AnyBrand> = B['__witness__'];
+export type BaseOf<B extends AnyBrand> = B['__base__'];
 
 /**
  * A `Brander` is a function that takes a value of some base type and casts
  * that value to a branded type derived from said base type. It can be thought
- * of as the type of a "constructor", in the functional programming sense of
- * the word.
+ * of as a data constructor for a Brand, like how quotes construct data that is of type `string`
  *
  * @example
  * ```
  * type UserId = Brand<number, 'user'>;
- * // A Brander<UserId> would take a number and return a UserId
+ * A Brander<UserId> would take a number and return a UserId
  * ```
  */
 export type Brander<B extends AnyBrand> = (underlying: BaseOf<B>) => B;
@@ -64,16 +62,16 @@ export type Brander<B extends AnyBrand> = (underlying: BaseOf<B>) => B;
  *
  * At runtime, this function simply returns the value as-is.
  *
- * @param underlying The value with a base type, to be casted
- * @return The same underlying value, but casted
+ * @param brandBase The value with a base type, to be casted
+ * @return The same inputted value, but casted
  * @example
  * ```
  * type UserId = Brand<number, 'user'>;
  * const UserId: Brander<UserId> = identity;
  * ```
  */
-export function identity<B extends AnyBrand>(underlying: BaseOf<B>): B {
-  return underlying as B;
+export function brander<B extends AnyBrand>(brandBase: BaseOf<B>): B {
+  return brandBase as B;
 }
 
 /**
@@ -89,6 +87,6 @@ export function identity<B extends AnyBrand>(underlying: BaseOf<B>): B {
  * const myUserId = UserId(42);
  * ```
  */
-export function make<B extends AnyBrand>(): Brander<B> {
-  return identity;
+export function createBrander<B extends AnyBrand>(): Brander<B> {
+  return brander;
 }
